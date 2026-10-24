@@ -13,7 +13,9 @@ def init_db():
             date TEXT NOT NULL,
             description TEXT NOT NULL,
             amount REAL NOT NULL,
-            category TEXT NOT NULL
+            t_type TEXT NOT NULL,
+            category TEXT NOT NULL,
+            notes TEXT
         )
     """)
     conn.commit()
@@ -30,6 +32,7 @@ col1, col2 = st.columns([1, 2])
 with col1:
     st.header("Add Transaction")
     with st.form("transaction_form", clear_on_submit=True):
+        ## There are 6 fields in the form: date, description, amount, type, category, notes, you need six ? bleow.
         date = st.date_input("Date", datetime.today())
         description = st.text_input("Description")
         amount = st.number_input("Amount", min_value=0.0, step=0.01) ##
@@ -41,10 +44,11 @@ with col1:
         if submitted:
             conn = sqlite3.connect('finance.db')
             c = conn.cursor()
+            ## Related to the comment above, you need to add six ? in the INSERT statement below to match the six fields in the form.
             c.execute("""
-                INSERT INTO transactions (date, description, amount, category)
-                VALUES (?, ?, ?, ?)
-            """, (date.strftime("%Y-%m-%d"), description, amount, category))
+                INSERT INTO transactions (date, description, amount, type, category, notes)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (date.strftime("%Y-%m-%d"), description, amount, t_type,category, notes))
             conn.commit()
             conn.close()
             st.success("Transaction added successfully!")
@@ -59,8 +63,8 @@ conn.close()
 with col2:
     st.subheader("Financial Summary")
     if not df.empty:
-        total_income = df[df["type"] == "Income"]["amount"].sum()
-        total_expense = df[df["type"] == "Expense"]["amount"].sum()
+        total_income = df[df["t_type"] == "Income"]["amount"].sum()
+        total_expense = df[df["t_type"] == "Expense"]["amount"].sum()
         net_savings = total_income - total_expense
 
         m1, m2, m3 = st.columns(3)
@@ -69,7 +73,7 @@ with col2:
         m3.metric("Net Savings", f"${net_savings:,.2f}")
 
         st.subheader("Spening by Category")
-        expense_df = df[df["type"] == "Expense"]
+        expense_df = df[df["t_type"] == "Expense"]
         if not expense_df.empty:
             category_summary = expense_df.groupby("category")["amount"].sum().reset_index()
             st.bar_chart(category_summary.set_index("category"))
@@ -77,6 +81,7 @@ with col2:
             st.info("No expense data available to display.")
 
         st.subheader("Recent Transactions")
-        st.dataframe(df)[["date", "description", "amount", "category"]]
+        ## WRONG LINE st.dataframe(df)[["date", "description", "amount", "category"]
+        st.dataframe(df[["date", "description", "amount", "category"]], use_container_width=True)  
     else:
         st.info("No transactions available. Please add some transactions to see the summary.")
