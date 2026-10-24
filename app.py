@@ -46,7 +46,7 @@ with col1:
             c = conn.cursor()
             ## Related to the comment above, you need to add six ? in the INSERT statement below to match the six fields in the form.
             c.execute("""
-                INSERT INTO transactions (date, description, amount, type, category, notes)
+                INSERT INTO transactions (date, description, amount, t_type, category, notes)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (date.strftime("%Y-%m-%d"), description, amount, t_type,category, notes))
             conn.commit()
