@@ -85,3 +85,22 @@ with col2:
         st.dataframe(df[["date", "description", "amount", "category"]], use_container_width=True)  
     else:
         st.info("No transactions available. Please add some transactions to see the summary.")
+
+
+# NEW FEATURE: CSV Backup Exporter Tool
+# ----------------------------------------------------
+st.write("---")
+st.subheader("Data Management")
+
+# Convert the full active DataFrame into a download-ready CSV string
+csv_data = df.to_csv(index=False).encode('utf-8')
+
+# Native web-safe download interface block
+st.download_button(
+    label="Download Ledger Backup (.CSV)",
+    data=csv_data,
+    file_name=f"finance_backup_{datetime.today().strftime('%Y-%m-%d')}.csv",
+    mime="text/csv",
+    help="Click to extract your transactional data out of SQLite into a standard local Excel/CSV format."
+)
+# ----------------------------------------------------
